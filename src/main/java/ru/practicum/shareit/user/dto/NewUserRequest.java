@@ -7,11 +7,11 @@ import lombok.Data;
 @Data
 public class NewUserRequest {
 
-    @NotBlank
+    @NotBlank(message = "Empty name not allowed")
     private String name;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "Empty Email not allowed")
+    @Email(message = "Wrong Email format")
     private String email;
 
 

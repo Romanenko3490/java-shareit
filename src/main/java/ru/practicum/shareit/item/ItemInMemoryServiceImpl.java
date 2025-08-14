@@ -79,7 +79,7 @@ public class ItemInMemoryServiceImpl implements ItemService {
                 .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
     }
 
-    public Collection<ItemDto> searchItemsByText(String text) {
+    public List<ItemDto> searchItemsByText(String text) {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
@@ -98,5 +98,9 @@ public class ItemInMemoryServiceImpl implements ItemService {
     private boolean containsText(Item item, String searchText) {
         return item.getDescription().toLowerCase().contains(searchText) ||
                 item.getName().toLowerCase().contains(searchText);
+    }
+
+    public void dropIdCounter() {
+        ID_COUNTER = 0;
     }
 }

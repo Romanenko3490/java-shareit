@@ -8,7 +8,7 @@ public class UpdateUserRequest {
 
     private String name;
 
-    @Email
+    @Email(message = "Wrong email format")
     private String email;
 
 
