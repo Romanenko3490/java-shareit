@@ -22,12 +22,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ViolationErrorResponse handleConstraintViolationException(ConstraintViolationException e) {
         final List<Violation> violations = e.getConstraintViolations().stream()
-                .map(violation -> new Violation(
-                        violation.getPropertyPath().toString(),
-                        violation.getMessage()
-                ))
+                .map(cv -> new Violation(
+                        cv.getPropertyPath().toString(),
+                        cv.getMessage()))
                 .collect(Collectors.toList());
-        log.error("Constraint Violations Found ({}) : {}", violations.size(), violations);
         return new ViolationErrorResponse(violations);
     }
 
