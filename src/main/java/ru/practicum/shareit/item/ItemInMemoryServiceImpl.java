@@ -100,7 +100,7 @@ public class ItemInMemoryServiceImpl implements ItemService {
                 item.getName().toLowerCase().contains(searchText);
     }
 
-    public void dropIdCounter() {
+    public static void dropIdCounter() {
         ID_COUNTER = 0;
     }
 }

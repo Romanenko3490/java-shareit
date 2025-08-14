@@ -86,7 +86,7 @@ public class UserInMemoryServiceImpl implements UserService {
         inMemoryStorage.getUsersItems().remove(userId);
     }
 
-    public void dropIdCounter() {
+    public static void dropIdCounter() {
         USER_ID_COUNTER = 0;
     }
 
