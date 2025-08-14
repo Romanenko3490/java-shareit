@@ -45,8 +45,8 @@ public class ItemInMemoryServiceImpl implements ItemService {
 
         List<Item> existsItems = inMemoryStorage.getUsersItems().get(userId);
 
-        Item existsItem = existsItems.stream().
-                filter(item -> item.getId().equals(itemId))
+        Item existsItem = existsItems.stream()
+                .filter(item -> item.getId().equals(itemId))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Item with id " + itemId + " not exists"));
 
