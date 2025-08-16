@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
                         cv.getPropertyPath().toString(),
                         cv.getMessage()))
                 .collect(Collectors.toList());
+        log.error("ConstraintViolationException ({}) : {}", violations.size(), violations);
         return new ViolationErrorResponse(violations);
     }
 

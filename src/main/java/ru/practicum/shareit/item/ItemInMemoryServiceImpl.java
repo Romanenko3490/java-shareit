@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -15,22 +15,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ItemInMemoryServiceImpl implements ItemService {
-    private static long ID_COUNTER = 0;
-    private final InMemoryStorage inMemoryStorage;
-
-    @Autowired
-    public ItemInMemoryServiceImpl(InMemoryStorage inMemoryStorage) {
-        this.inMemoryStorage = inMemoryStorage;
-    }
+    private final InMemoryStorage storage;
 
     @Override
     public ItemDto addItem(Long userId, NewItemRequest request) {
         Item item = ItemMapper.mapToItem(userId, request);
-        if (inMemoryStorage.getUsersItems().containsKey(userId)) {
-            ID_COUNTER++;
-            item.setId(ID_COUNTER);
-            inMemoryStorage.getUsersItems().get(userId).add(item);
+        if (storage.getUsersItems().containsKey(userId)) {
+            InMemoryStorage.increaseItemId();
+            item.setId(InMemoryStorage.getItemId());
+            storage.getUsersItems().get(userId).add(item);
         } else {
             throw new NotFoundException("User not found");
         }
@@ -39,11 +34,11 @@ public class ItemInMemoryServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(Long userId, Long itemId, UpdateItemRequest request) {
-        if (!inMemoryStorage.getUsersItems().containsKey(userId)) {
+        if (!storage.getUsersItems().containsKey(userId)) {
             throw new NotFoundException("You are using userId which is not exists");
         }
 
-        List<Item> existsItems = inMemoryStorage.getUsersItems().get(userId);
+        List<Item> existsItems = storage.getUsersItems().get(userId);
 
         Item existsItem = existsItems.stream()
                 .filter(item -> item.getId().equals(itemId))
@@ -60,7 +55,7 @@ public class ItemInMemoryServiceImpl implements ItemService {
     @Override
     public ItemDto getItem(Long itemId) {
 
-        return inMemoryStorage.getUsersItems().values().stream()
+        return storage.getUsersItems().values().stream()
                 .flatMap(List::stream)
                 .filter(item -> item.getId().equals(itemId))
                 .findFirst()
@@ -71,11 +66,11 @@ public class ItemInMemoryServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> getUserItems(Long userId) {
 
-        if (!inMemoryStorage.getUsersItems().containsKey(userId)) {
+        if (!storage.getUsersItems().containsKey(userId)) {
             throw new NotFoundException("You are using userId which is not exists");
         }
 
-        return inMemoryStorage.getUsersItems().get(userId).stream()
+        return storage.getUsersItems().get(userId).stream()
                 .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
     }
 
@@ -86,7 +81,7 @@ public class ItemInMemoryServiceImpl implements ItemService {
 
         String searchText = text.toLowerCase();
 
-        return inMemoryStorage.getUsersItems().values().stream()
+        return storage.getUsersItems().values().stream()
                 .flatMap(List::stream)
                 .filter(item -> item.getAvailable())
                 .filter(item -> containsText(item, searchText))
@@ -98,9 +93,5 @@ public class ItemInMemoryServiceImpl implements ItemService {
     private boolean containsText(Item item, String searchText) {
         return item.getDescription().toLowerCase().contains(searchText) ||
                 item.getName().toLowerCase().contains(searchText);
-    }
-
-    public static void dropIdCounter() {
-        ID_COUNTER = 0;
     }
 }

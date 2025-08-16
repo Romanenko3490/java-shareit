@@ -31,7 +31,7 @@ class UserControllerTest {
     void setUp() {
         inMemoryStorage.getUsers().clear();
         inMemoryStorage.getUsersItems().clear();
-        userService.dropIdCounter();
+        InMemoryStorage.dropUserId();
         this.newUserRequest = new NewUserRequest();
         newUserRequest.setEmail("test@email.com");
         newUserRequest.setName("Test Name");

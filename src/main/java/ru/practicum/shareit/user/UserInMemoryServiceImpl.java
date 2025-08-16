@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 @Service
 public class UserInMemoryServiceImpl implements UserService {
-    private static long USER_ID_COUNTER = 0;
+
     private final InMemoryStorage inMemoryStorage;
 
     @Autowired
@@ -38,8 +38,8 @@ public class UserInMemoryServiceImpl implements UserService {
             throw new DuplicateKeyException("User with email " + user.getEmail() + " already exists");
         }
 
-        USER_ID_COUNTER++;
-        user.setId(USER_ID_COUNTER);
+        InMemoryStorage.increaseUserId();
+        user.setId(InMemoryStorage.getUserId());
         inMemoryStorage.getUsers().put(user.getId(), user);
         inMemoryStorage.getUsersItems().put(user.getId(), new ArrayList<>());
         return UserMapper.mapToUserDto(user);
@@ -85,9 +85,4 @@ public class UserInMemoryServiceImpl implements UserService {
         inMemoryStorage.getUsers().remove(userId);
         inMemoryStorage.getUsersItems().remove(userId);
     }
-
-    public static void dropIdCounter() {
-        USER_ID_COUNTER = 0;
-    }
-
 }

@@ -36,8 +36,8 @@ class ItemControllerTest {
     void setUp() {
         inMemoryStorage.getUsers().clear();
         inMemoryStorage.getUsersItems().clear();
-        itemService.dropIdCounter();
-        userService.dropIdCounter();
+        InMemoryStorage.dropItemIdCounter();
+        InMemoryStorage.dropUserId();
 
         this.newItemRequest = new NewItemRequest();
         this.updateItemRequest = new UpdateItemRequest();

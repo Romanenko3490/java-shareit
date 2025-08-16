@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item;
 
 
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemRequest;
@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.model.Item;
 
 @Slf4j
-@NoArgsConstructor
+@UtilityClass
 public class ItemMapper {
     public static Item mapToItem(Long userId, NewItemRequest request) {
         log.info("Mapping request to Item");
