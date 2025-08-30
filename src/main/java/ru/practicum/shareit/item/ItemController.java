@@ -4,15 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
@@ -30,7 +22,7 @@ public class ItemController {
     /**
      * Сервис для работы с предметами.
      */
-    private final ItemInMemoryServiceImpl itemService;
+    private final ItemServiceImpl itemService;
 
     /**
      * Создает новый предмет.
@@ -41,9 +33,9 @@ public class ItemController {
      */
     @PostMapping
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id")
-                              @Min(1) final Long userId,
+                              @Min(1) Long userId,
                               @RequestBody
-                              @Valid final NewItemRequest request) {
+                              @Valid NewItemRequest request) {
         return itemService.addItem(userId, request);
     }
 
@@ -57,11 +49,11 @@ public class ItemController {
      */
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id")
-                                  @Min(1) final Long userId,
-                                  @PathVariable
-                                  @Min(1) final Long itemId,
-                                  @RequestBody
-                                  @Valid final UpdateItemRequest request) {
+                              @Min(1) Long userId,
+                              @PathVariable
+                              @Min(1) Long itemId,
+                              @RequestBody
+                              @Valid UpdateItemRequest request) {
         return itemService.updateItem(userId, itemId, request);
     }
 
@@ -72,7 +64,8 @@ public class ItemController {
      * @return найденный предмет
      */
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable @Min(1) final Long itemId) {
+    public ItemDto getItem(@PathVariable
+                           @Min(1) Long itemId) {
         return itemService.getItem(itemId);
     }
 
@@ -84,7 +77,8 @@ public class ItemController {
      */
     @GetMapping()
     public Collection<ItemDto> getUserItems(
-            @RequestHeader("X-Sharer-User-Id") @Min(1) final Long userId) {
+            @RequestHeader("X-Sharer-User-Id")
+            @Min(1) Long userId) {
         return itemService.getUserItems(userId);
     }
 
@@ -96,7 +90,7 @@ public class ItemController {
      */
     @GetMapping("/search")
     public Collection<ItemDto> searchItemsByText(@RequestParam("text")
-                                                     final String text) {
+                                                 String text) {
         return itemService.searchItemsByText(text);
     }
 }

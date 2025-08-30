@@ -32,7 +32,7 @@ public class ItemMapper {
         Item item = new Item();
         item.setName(request.getName());
         item.setDescription(request.getDescription());
-        item.setOwner(userId);
+        item.setOwnerId(userId);
         item.setAvailable(request.getAvailable());
 
         if (request.getRequest() != null) {
@@ -53,6 +53,7 @@ public class ItemMapper {
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
+        itemDto.setOwnerId(item.getOwnerId());
         itemDto.setAvailable(item.getAvailable());
         return itemDto;
     }

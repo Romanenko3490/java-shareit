@@ -27,6 +27,11 @@ public class ItemDto {
     private String description;
 
     /**
+     * Описание предмета.
+     */
+    private Long ownerId;
+
+    /**
      * Доступность предмета для аренды.
      */
     private Boolean available;

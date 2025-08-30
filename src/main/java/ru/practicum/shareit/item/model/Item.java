@@ -1,17 +1,7 @@
 package ru.practicum.shareit.item.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
 /**
  * Сущность предмета.
@@ -53,8 +43,8 @@ public class Item {
     /**
      * Идентификатор владельца предмета.
      */
-    @Column(nullable = false)
-    private Long owner;
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
 
     /**
      * ID запроса на предмет.
@@ -64,11 +54,11 @@ public class Item {
     /**
      * Конструктор для создания предмета.
      *
-     * @param itemId      ID предмета
-     * @param itemName    название предмета
+     * @param itemId          ID предмета
+     * @param itemName        название предмета
      * @param itemDescription описание предмета
      * @param itemAvailable   доступность предмета
-     * @param itemOwner   ID владельца
+     * @param itemOwner       ID владельца
      */
     public Item(final Long itemId,
                 final String itemName,
@@ -79,7 +69,7 @@ public class Item {
         this.name = itemName;
         this.description = itemDescription;
         this.available = itemAvailable;
-        this.owner = itemOwner;
+        this.ownerId = itemOwner;
         this.request = null;
     }
 }
