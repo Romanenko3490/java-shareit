@@ -9,39 +9,79 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * In-memory хранилище для данных приложения.
+ * Хранит пользователей и предметы в памяти.
+ */
 @Repository
 @Getter
 public class InMemoryStorage {
-    private static long ITEM_ID_COUNTER = 0;
-    private static long USER_ID_COUNTER = 0;
+    /**
+     * Счетчик для генерации ID предметов.
+     */
+    private static long itemIdCounter = 0;
 
+    /**
+     * Счетчик для генерации ID пользователей.
+     */
+    private static long userIdCounter = 0;
+
+    /**
+     * Карта предметов по пользователям.
+     */
     private Map<Long, List<Item>> usersItems = new HashMap<>();
+
+    /**
+     * Карта пользователей.
+     */
     private Map<Long, User> users = new HashMap<>();
 
-
-    //Items
+    /**
+     * Увеличивает счетчик ID предметов.
+     */
     public static void increaseItemId() {
-        ITEM_ID_COUNTER++;
+        itemIdCounter++;
     }
 
+    /**
+     * Возвращает текущее значение счетчика ID предметов.
+     *
+     * @return текущий ID предмета
+     */
     public static long getItemId() {
-        return ITEM_ID_COUNTER;
+        return itemIdCounter;
     }
 
+    /**
+     * Сбрасывает счетчик ID предметов.
+     */
     public static void dropItemIdCounter() {
-        ITEM_ID_COUNTER = 0;
+        itemIdCounter = 0;
     }
 
-    //Users
+    /**
+     * Возвращает текущее значение счетчика ID пользователей.
+     *
+     * @return текущий ID пользователя
+     */
     public static long getUserId() {
-        return USER_ID_COUNTER;
+        return userIdCounter;
     }
 
+    /**
+     * Увеличивает счетчик ID пользователей.
+     */
     public static void increaseUserId() {
-        USER_ID_COUNTER++;
+        userIdCounter++;
     }
 
+    /**
+     * Сбрасывает счетчик ID пользователей.
+     *
+     * @return новое значение счетчика (0)
+     */
     public static long dropUserId() {
-        return USER_ID_COUNTER = 0;
+        userIdCounter = 0;
+        return userIdCounter;
     }
 }

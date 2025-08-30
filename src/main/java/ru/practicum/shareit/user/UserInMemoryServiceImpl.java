@@ -1,88 +1,84 @@
 package ru.practicum.shareit.user;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.storage.InMemoryStorage;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
-
+/**
+ * Реализация сервиса для работы с пользователями.
+ */
 @Service
-public class UserInMemoryServiceImpl implements UserService {
+@RequiredArgsConstructor
+public final class UserInMemoryServiceImpl implements UserService {
+    /**
+     * Репозиторий пользователей.
+     */
+    private final UserRepository repository;
 
-    private final InMemoryStorage inMemoryStorage;
-
-    @Autowired
-    public UserInMemoryServiceImpl(InMemoryStorage inMemoryStorage) {
-        this.inMemoryStorage = inMemoryStorage;
-    }
-
+    /**
+     * Добавляет нового пользователя.
+     *
+     * @param request данные пользователя
+     * @return созданный пользователь
+     */
     @Override
-    public UserDto addUser(NewUserRequest request) {
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-
-        long counter = inMemoryStorage.getUsers().values().stream()
-                .map(User::getEmail)
-                .filter(email -> email.equals(user.getEmail()))
-                .count();
-
-        if (counter > 0) {
-            throw new DuplicateKeyException("User with email " + user.getEmail() + " already exists");
-        }
-
-        InMemoryStorage.increaseUserId();
-        user.setId(InMemoryStorage.getUserId());
-        inMemoryStorage.getUsers().put(user.getId(), user);
-        inMemoryStorage.getUsersItems().put(user.getId(), new ArrayList<>());
+    public UserDto addUser(final NewUserRequest request) {
+        User user = repository.save(UserMapper.mapToUser(request));
         return UserMapper.mapToUserDto(user);
     }
 
+    /**
+     * Обновляет существующего пользователя.
+     *
+     * @param userId  ID пользователя
+     * @param request данные для обновления
+     * @return обновленный пользователь
+     */
     @Override
-    public UserDto updateUser(Long userId, UpdateUserRequest request) {
-        if (!inMemoryStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("User with id " + userId + " not found");
-        }
+    public UserDto updateUser(final Long userId,
+                              final UpdateUserRequest request) {
+        User user = repository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (request.getEmail() != null) {
-            long counter = inMemoryStorage.getUsers().values().stream()
-                    .map(User::getEmail)
-                    .filter(email -> email.equals(request.getEmail()))
-                    .count();
-
-            if (counter > 0) {
-                throw new DuplicateKeyException("User with email " + request.getEmail() + " already exists");
+        if (request.hasEmail() && !user.getEmail().equals(request.getEmail())) {
+            if (repository.existsByEmail(request.getEmail())) {
+                throw new ValidationException("Email already exists");
             }
         }
 
-        User exitsUser = inMemoryStorage.getUsers().get(userId);
-        User updatedUser = UserMapper.updateUser(exitsUser, request);
-        inMemoryStorage.getUsers().remove(userId);
-        inMemoryStorage.getUsers().put(userId, updatedUser);
-        return UserMapper.mapToUserDto(updatedUser);
+        UserMapper.updateUser(user, request);
+        return UserMapper.mapToUserDto(user);
     }
 
+    /**
+     * Получает пользователя по ID.
+     *
+     * @param userId ID пользователя
+     * @return найденный пользователь
+     */
     @Override
-    public UserDto getUser(Long userId) {
-        if (!inMemoryStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("User with id " + userId + " not found");
-        }
-        return UserMapper.mapToUserDto(inMemoryStorage.getUsers().get(userId));
+    public UserDto getUser(final Long userId) {
+        return UserMapper.mapToUserDto(repository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found")));
     }
 
+    /**
+     * Удаляет пользователя по ID.
+     *
+     * @param userId ID пользователя
+     */
     @Override
-    public void deleteUser(Long userId) {
-        if (!inMemoryStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("User with id " + userId + " not found");
+    public void deleteUser(final Long userId) {
+        if (!repository.existsById(userId)) {
+            repository.deleteById(userId);
         }
-        inMemoryStorage.getUsers().remove(userId);
-        inMemoryStorage.getUsersItems().remove(userId);
+        repository.deleteById(userId);
     }
 }

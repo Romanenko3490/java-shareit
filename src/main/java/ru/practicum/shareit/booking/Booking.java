@@ -7,13 +7,30 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Класс, представляющий бронирование предмета.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Booking {
+    /**
+     * Уникальный идентификатор бронирования.
+     */
     private Long id;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private User booker;
 
+    /**
+     * Дата и время начала бронирования.
+     */
+    private LocalDateTime startTime;
+
+    /**
+     * Дата и время окончания бронирования.
+     */
+    private LocalDateTime endTime;
+
+    /**
+     * Пользователь, который осуществляет бронирование.
+     */
+    private User booker;
 }

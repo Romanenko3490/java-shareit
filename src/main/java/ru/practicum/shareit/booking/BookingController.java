@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * TODO Sprint add-bookings.
+ * Контроллер для работы с бронированиями.
+ * Обрабатывает HTTP-запросы, связанные с бронированием предметов.
  */
 @RestController
 @RequestMapping(path = "/bookings")
