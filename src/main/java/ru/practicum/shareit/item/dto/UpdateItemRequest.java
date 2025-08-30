@@ -6,7 +6,7 @@ import lombok.Data;
  * DTO для обновления предмета.
  */
 @Data
-public final class UpdateItemRequest {
+public class UpdateItemRequest {
     /**
      * Название предмета.
      */

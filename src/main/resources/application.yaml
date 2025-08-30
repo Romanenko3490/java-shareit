@@ -11,9 +11,10 @@ spring:
     properties:
       hibernate.jdbc.time_zone: UTC
     defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   datasource:
     username: "dbuser"
     password: "12345"
-    url: "jdbc:postgresql://localhost:15432/shereit"
+    url: "jdbc:postgresql://localhost:15432/shareit"
     driver-class-name: org.postgresql.Driver

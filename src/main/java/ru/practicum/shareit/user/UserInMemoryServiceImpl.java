@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -16,7 +17,7 @@ import ru.practicum.shareit.user.model.User;
  */
 @Service
 @RequiredArgsConstructor
-public final class UserInMemoryServiceImpl implements UserService {
+public class UserInMemoryServiceImpl implements UserService {
     /**
      * Репозиторий пользователей.
      */
@@ -49,7 +50,7 @@ public final class UserInMemoryServiceImpl implements UserService {
 
         if (request.hasEmail() && !user.getEmail().equals(request.getEmail())) {
             if (repository.existsByEmail(request.getEmail())) {
-                throw new ValidationException("Email already exists");
+                throw new DuplicateKeyException("Email already exists");
             }
         }
 

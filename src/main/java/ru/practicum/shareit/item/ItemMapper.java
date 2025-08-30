@@ -10,7 +10,7 @@ import ru.practicum.shareit.item.model.Item;
  * Утилитарный класс для маппинга между DTO и сущностями предметов.
  */
 @Slf4j
-public final class ItemMapper {
+public class ItemMapper {
 
     /**
      * Приватный конструктор для утилитного класса.

@@ -23,7 +23,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Validated
-public final class UserController {
+public class UserController {
     /**
      * Сервис для работы с пользователями.
      */

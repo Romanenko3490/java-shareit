@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public final class ItemInMemoryServiceImpl implements ItemService {
+public class ItemInMemoryServiceImpl implements ItemService {
     /**
      * Хранилище данных.
      */

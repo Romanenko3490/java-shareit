@@ -26,7 +26,7 @@ import java.util.Collection;
 @RequestMapping("/items")
 @AllArgsConstructor
 @Validated
-public final class ItemController {
+public class ItemController {
     /**
      * Сервис для работы с предметами.
      */
