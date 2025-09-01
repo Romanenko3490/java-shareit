@@ -1,7 +1,7 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -10,12 +10,20 @@ import java.time.LocalDateTime;
  * Модель запроса на предмет.
  * Представляет запрос пользователя на добавление нового предмета.
  */
-@Data
+@Entity
+@NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Getter
+@Setter
 public class ItemRequest {
     /**
      * Идентификатор запроса.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     /**
@@ -26,6 +34,8 @@ public class ItemRequest {
     /**
      * Пользователь, создавший запрос.
      */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requester_id")
     private User requester;
 
     /**
@@ -38,13 +48,13 @@ public class ItemRequest {
      *
      * @param requestId          идентификатор запроса
      * @param requestDescription описание запроса
-     * @param requestRequester   пользователь-инициатор
+     * @param requester   пользователь-инициатор
      */
     public ItemRequest(final Long requestId, final String requestDescription,
-                       final User requestRequester) {
+                       final User requester) {
         this.id = requestId;
         this.description = requestDescription;
-        this.requester = requestRequester;
+        this.requester = requester;
         this.created = LocalDateTime.now();
     }
 }

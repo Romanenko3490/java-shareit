@@ -2,6 +2,9 @@ package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 /**
  * Сущность предмета.
@@ -14,6 +17,7 @@ import lombok.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
+@Builder
 public class Item {
     /**
      * Идентификатор предмета.
@@ -43,13 +47,16 @@ public class Item {
     /**
      * Идентификатор владельца предмета.
      */
-    @Column(name = "owner_id", nullable = false)
-    private Long ownerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     /**
      * ID запроса на предмет.
      */
-    private String request;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 
     /**
      * Конструктор для создания предмета.
@@ -58,18 +65,17 @@ public class Item {
      * @param itemName        название предмета
      * @param itemDescription описание предмета
      * @param itemAvailable   доступность предмета
-     * @param itemOwner       ID владельца
+     * @param owner           владелец
      */
     public Item(final Long itemId,
                 final String itemName,
                 final String itemDescription,
                 final Boolean itemAvailable,
-                final Long itemOwner) {
+                final User owner) {
         this.id = itemId;
         this.name = itemName;
         this.description = itemDescription;
         this.available = itemAvailable;
-        this.ownerId = itemOwner;
-        this.request = null;
+        this.owner = owner;
     }
 }

@@ -22,7 +22,7 @@ public class ItemController {
     /**
      * Сервис для работы с предметами.
      */
-    private final ItemServiceImpl itemService;
+    private final ItemService itemService;
 
     /**
      * Создает новый предмет.

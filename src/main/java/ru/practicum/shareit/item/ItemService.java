@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.GlobalMapper;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -10,6 +11,7 @@ import ru.practicum.shareit.item.dto.NewItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ItemServiceImpl {
+public class ItemService {
     /**
      * Репозитории.
      */
@@ -38,12 +40,17 @@ public class ItemServiceImpl {
      */
     public ItemDto addItem(Long userId, NewItemRequest request) {
         log.debug("Adding new item");
-        if (!userRepository.findById(userId).isPresent()) {
-            throw new NotFoundException("User not found");
-        }
-        Item item = ItemMapper.mapToItem(userId, request);
-        log.debug("Creating new item {}", item);
-        return ItemMapper.mapToItemDto(itemRepository.save(item));
+        User owner = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found"));
+        Item item = Item.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .owner(owner)
+                .available(request.getAvailable())
+                .build();
+        Item savedItem = itemRepository.save(item);
+        log.debug("Creating new item {}", savedItem);
+        return GlobalMapper.toDto(savedItem);
     }
 
     /**
@@ -61,14 +68,15 @@ public class ItemServiceImpl {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
 
-        if (userId != item.getOwnerId()) {
+        if (userId != item.getOwner().getId()) {
             throw new NotFoundException("User with id " + userId + " don't have item with id " + itemId);
         }
 
-        Item updatedItem = ItemMapper.updateItem(item, request);
-        log.debug("Updated item {}", updatedItem);
+        updateFields(item, request);
+        Item updatedItem = itemRepository.save(item);
+        log.debug("Updated item {}", item);
 
-        return ItemMapper.mapToItemDto(updatedItem);
+        return GlobalMapper.toDto(updatedItem);
     }
 
     /**
@@ -79,8 +87,9 @@ public class ItemServiceImpl {
      */
     public ItemDto getItem(Long itemId) {
         log.debug("Getting item {}", itemId);
-        return ItemMapper.mapToItemDto(itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found")));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found"));
+        return GlobalMapper.toDto(item);
     }
 
     /**
@@ -95,9 +104,9 @@ public class ItemServiceImpl {
             throw new NotFoundException("User not found");
         }
 
-        return itemRepository.findAllByOwnerId(userId)
+        return itemRepository.findAllByOwner_Id(userId)
                 .stream()
-                .map(ItemMapper::mapToItemDto)
+                .map(GlobalMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -116,8 +125,29 @@ public class ItemServiceImpl {
         String searchText = text.toLowerCase();
         log.debug("Searching items by text {}", searchText);
         return itemRepository.searchAvailableItemsByText(searchText).stream()
-                .map(ItemMapper::mapToItemDto)
+                .map(GlobalMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Вспомогательный метод.
+     *
+     * @param item    предемет для обновления
+     * @param request запрос на обновление
+     * @return список найденных предметов
+     */
+    private Item updateFields(final Item item,
+                              final UpdateItemRequest request) {
+        if (request.hasName()) {
+            item.setName(request.getName());
+        }
+        if (request.hasDescription()) {
+            item.setDescription(request.getDescription());
+        }
+        if (request.hasAvailable()) {
+            item.setAvailable(request.getAvailable());
+        }
+        return item;
     }
 
 }
