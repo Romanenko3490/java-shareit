@@ -93,8 +93,9 @@ public class ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
 
-        if (userId != item.getOwner().getId()) {
-            throw new NotFoundException("User with id " + userId + " don't have item with id " + itemId);
+        if (!userId.equals(item.getOwner().getId())) {
+            throw new NotFoundException("User with id " +
+                    userId + " don't have item with id " + itemId);
         }
 
         updateFields(item, request);
@@ -129,7 +130,8 @@ public class ItemService {
         BookingShortDto lastBookingShortDto = GlobalMapper.toShortDto(lastBooking);
         BookingShortDto nextBookingShortDto = GlobalMapper.toShortDto(nextBooking);
 
-        return GlobalMapper.toItemLastNextBookingsAndCommentsDto(item, lastBookingShortDto, nextBookingShortDto, comments);
+        return GlobalMapper.toItemLastNextBookingsAndCommentsDto(
+                item, lastBookingShortDto, nextBookingShortDto, comments);
     }
 
     /**
@@ -164,10 +166,13 @@ public class ItemService {
 
         return userItems.stream()
                 .map(item -> {
-                    List<Booking> itemBookings = bookingsByItemId.getOrDefault(item.getId(), Collections.emptyList());
-                    List<Comment> itemComments = commentsByItemId.getOrDefault(item.getId(), Collections.emptyList());
+                    List<Booking> itemBookings = bookingsByItemId.getOrDefault(
+                            item.getId(), Collections.emptyList());
+                    List<Comment> itemComments = commentsByItemId.getOrDefault(
+                            item.getId(), Collections.emptyList());
 
-                    return GlobalMapper.toItemWithBookingsDto(item, itemBookings, itemComments);
+                    return GlobalMapper.toItemWithBookingsDto(
+                            item, itemBookings, itemComments);
                 })
                 .collect(Collectors.toList());
     }
@@ -201,7 +206,9 @@ public class ItemService {
      * @throws NotFoundException   если пользователь или предмет не найдены
      * @throws ValidationException если пользователь не имеет завершенных бронирований данного предмета
      */
-    public CommentDto addComment(Long userId, Long itemId, NewCommentRequest request) {
+    public CommentDto addComment(Long userId,
+                                 Long itemId,
+                                 NewCommentRequest request) {
         log.debug("Adding new comment {}", request);
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User not found"));

@@ -58,7 +58,7 @@ public class Comment {
      * Дата и время создания комментария
      * Автоматически устанавливается при создании комментария
      */
-    LocalDateTime created;
+    private LocalDateTime created;
 
     /**
      * Конструктор для создания нового комментария

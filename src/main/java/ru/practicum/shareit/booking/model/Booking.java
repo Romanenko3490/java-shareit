@@ -58,5 +58,6 @@ public class Booking {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
+    @Builder.Default
     private BookingStatus bookingStatus = BookingStatus.WAITING;
 }
