@@ -3,11 +3,12 @@ package ru.practicum.shareit.item;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.comments.dto.CommentDto;
+import ru.practicum.shareit.item.comments.dto.NewCommentRequest;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.Collection;
 
@@ -18,6 +19,7 @@ import java.util.Collection;
 @RequestMapping("/items")
 @AllArgsConstructor
 @Validated
+@Slf4j
 public class ItemController {
     /**
      * Сервис для работы с предметами.
@@ -64,8 +66,11 @@ public class ItemController {
      * @return найденный предмет
      */
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable
-                           @Min(1) Long itemId) {
+    public ItemLastNextBookingsAndCommentsDto getItem(
+            @RequestHeader("X-Sharer-User-Id")
+            @Min(1) Long userId,
+            @PathVariable
+            @Min(1) Long itemId) {
         return itemService.getItem(itemId);
     }
 
@@ -76,7 +81,7 @@ public class ItemController {
      * @return коллекция предметов пользователя
      */
     @GetMapping()
-    public Collection<ItemDto> getUserItems(
+    public Collection<ItemWithBookingsDto> getUserItems(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId) {
         return itemService.getUserItems(userId);
@@ -92,5 +97,14 @@ public class ItemController {
     public Collection<ItemDto> searchItemsByText(@RequestParam("text")
                                                  String text) {
         return itemService.searchItemsByText(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id")
+                                 @Min(1) Long userId,
+                                 @PathVariable @Min(1) Long itemId,
+                                 @RequestBody
+                                 @Valid NewCommentRequest request) {
+        return itemService.addComment(userId, itemId, request);
     }
 }

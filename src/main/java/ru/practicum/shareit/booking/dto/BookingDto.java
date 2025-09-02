@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.enums.BookingStatus;
 
 import java.time.LocalDateTime;
 
@@ -47,18 +44,18 @@ public class BookingDto {
      * Не может быть null.
      */
     @NotNull
-    private ItemDto item;
+    private ItemBookingDto item;
 
     /**
      * Пользователь, который осуществил бронирование.
      * Не может быть null.
      */
     @NotNull
-    private UserDto booker;
+    private UserBookingDto booker;
 
     /**
      * Статус бронирования.
      * Может содержать значения: APPROVED, REJECTED, WAITING, CANCELED и т.д.
      */
-    private String status;
+    private BookingStatus status;
 }

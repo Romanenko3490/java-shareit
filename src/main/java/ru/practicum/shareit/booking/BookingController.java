@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
+import ru.practicum.shareit.enums.BookingState;
 
 import java.util.List;
 
@@ -81,7 +82,8 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
             @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.getUserBookings(userId, state);
+        BookingState bookingState = BookingState.from(state);
+        return bookingService.getUserBookings(userId, bookingState);
     }
 
     /**
@@ -96,6 +98,7 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
             @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.getOwnerBookings(userId, state);
+        BookingState bookingState = BookingState.from(state);
+        return bookingService.getOwnerBookings(userId, bookingState);
     }
 }

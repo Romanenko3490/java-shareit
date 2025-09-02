@@ -3,19 +3,27 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.GlobalMapper;
+import ru.practicum.shareit.booking.dal.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.comments.dal.CommentRepository;
+import ru.practicum.shareit.item.comments.dto.CommentDto;
+import ru.practicum.shareit.item.comments.dto.NewCommentRequest;
+import ru.practicum.shareit.item.comments.model.Comment;
 import ru.practicum.shareit.item.dal.ItemRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.NewItemRequest;
-import ru.practicum.shareit.item.dto.UpdateItemRequest;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.util.GlobalMapper;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +38,8 @@ public class ItemService {
      */
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * Добавляет новый предмет.
@@ -85,11 +95,26 @@ public class ItemService {
      * @param itemId ID предмета
      * @return найденный предмет
      */
-    public ItemDto getItem(Long itemId) {
+    public ItemLastNextBookingsAndCommentsDto getItem(Long itemId) {
         log.debug("Getting item {}", itemId);
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
-        return GlobalMapper.toDto(item);
+
+        List<Comment> comments = commentRepository.findByItem_Id(itemId);
+
+        Long ownerId = item.getOwner().getId();
+
+        // Используем методы репозитория
+        Booking lastBooking = bookingRepository.findLastBookingForItem(itemId, ownerId)
+                .orElse(null);
+        Booking nextBooking = bookingRepository.findNextBookingForItem(itemId, ownerId)
+                .orElse(null);
+
+        BookingShortDto lastBookingShortDto = GlobalMapper.toShortDto(lastBooking);
+        BookingShortDto nextBookingShortDto = GlobalMapper.toShortDto(nextBooking);
+
+        return GlobalMapper.toItemLastNextBookingsAndCommentsDto(item, lastBookingShortDto, nextBookingShortDto, comments);
+
     }
 
     /**
@@ -98,15 +123,36 @@ public class ItemService {
      * @param userId ID пользователя
      * @return коллекция предметов пользователя
      */
-    public Collection<ItemDto> getUserItems(Long userId) {
-        log.debug("Getting items by user {}", userId);
+    public Collection<ItemWithBookingsDto> getUserItems(Long userId) {
+        log.debug("Getting items with bookings by user {}", userId);
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User not found");
         }
 
-        return itemRepository.findAllByOwner_Id(userId)
+        // Одним запросом получаем все предметы пользователя
+        List<Item> userItems = itemRepository.findAllByOwner_Id(userId);
+
+        // Одним запросом получаем все бронирования для этих предметов
+        List<Long> itemIds = userItems.stream()
+                .map(Item::getId)
+                .collect(Collectors.toList());
+
+        List<Booking> allBookings = bookingRepository.findByItemIdIn(itemIds);
+        Map<Long, List<Booking>> bookingsByItemId = allBookings.stream()
+                .collect(Collectors.groupingBy(b -> b.getItem().getId()));
+
+        // Одним запросом получаем все комментарии
+        Map<Long, List<Comment>> commentsByItemId = commentRepository.findByItemIdIn(itemIds)
                 .stream()
-                .map(GlobalMapper::toDto)
+                .collect(Collectors.groupingBy(c -> c.getItem().getId()));
+
+        return userItems.stream()
+                .map(item -> {
+                    List<Booking> itemBookings = bookingsByItemId.getOrDefault(item.getId(), Collections.emptyList());
+                    List<Comment> itemComments = commentsByItemId.getOrDefault(item.getId(), Collections.emptyList());
+
+                    return GlobalMapper.toItemWithBookingsDto(item, itemBookings, itemComments);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -127,6 +173,32 @@ public class ItemService {
         return itemRepository.searchAvailableItemsByText(searchText).stream()
                 .map(GlobalMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+
+    public CommentDto addComment(Long userId, Long itemId, NewCommentRequest request) {
+        log.debug("Adding new comment {}", request);
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found"));
+        Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new NotFoundException("Item not found"));
+
+        boolean hasValidBooking = bookingRepository.hasUserCompletedBookings(userId, itemId);
+
+        if (!hasValidBooking) {
+            log.debug("User {} has no bookings for item {}", userId, itemId);
+            throw new ValidationException("User must have completed bookings for item " + itemId);
+        }
+
+        Comment comment = commentRepository.save(Comment.builder()
+                .text(request.getText())
+                .item(item)
+                .author(user)
+                .created(LocalDateTime.now())
+                .build());
+        log.debug("Added comment {}", comment);
+
+        return GlobalMapper.toCommentDto(comment);
     }
 
     /**

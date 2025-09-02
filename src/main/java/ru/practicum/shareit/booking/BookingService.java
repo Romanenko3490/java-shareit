@@ -1,17 +1,14 @@
 package ru.practicum.shareit.booking;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.GlobalMapper;
 import ru.practicum.shareit.booking.dal.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.QBooking;
+import ru.practicum.shareit.enums.BookingState;
 import ru.practicum.shareit.enums.BookingStatus;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -19,11 +16,10 @@ import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.util.GlobalMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Сервис для управления операциями бронирования.
@@ -129,8 +125,15 @@ public class BookingService {
      * @param state  статус бронирования (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED)
      * @return список DTO бронирований
      */
-    public List<BookingDto> getUserBookings(Long userId, String state) {
-        return getBookingsAsState(userId, state, false);
+    public List<BookingDto> getUserBookings(Long userId, BookingState state) {
+        if (!userRepository.findById(userId).isPresent()) {
+            throw new NotFoundException("User not found");
+        }
+
+        return bookingRepository.findBookingsByState(userId, state, false, null)
+                .stream()
+                .map(GlobalMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -141,84 +144,14 @@ public class BookingService {
      * @return список DTO бронирований
      */
     @Transactional(readOnly = true)
-    public List<BookingDto> getOwnerBookings(Long ownerId, String state) {
-        return getBookingsAsState(ownerId, state, true);
-    }
-
-    /**
-     * Вспомогательный метод для получения бронирований с фильтрацией по статусу.
-     *
-     * @param userId  идентификатор пользователя
-     * @param state   статус бронирования
-     * @param isOwner флаг, указывающий является ли пользователь владельцем предметов
-     * @return список DTO бронирований, отфильтрованных по статусу
-     * @throws ValidationException если передан неверный статус
-     */
-    private List<BookingDto> getBookingsAsState(Long userId, String state, boolean isOwner) {
-        log.debug("getUserBookings bookerId={}, state={}", userId, state);
-        if (!userRepository.findById(userId).isPresent()) {
+    public List<BookingDto> getOwnerBookings(Long ownerId, BookingState state) {
+        if (!userRepository.findById(ownerId).isPresent()) {
             throw new NotFoundException("User not found");
         }
-        // Получил Q-класс для работы с полями Booking
-        QBooking booking = QBooking.booking;
-
-        // Базовое условие - бронирования только для этого пользователя
-        // Эквивалент WHERE
-        BooleanExpression baseCondition = isOwner ?
-                booking.item.owner.id.eq(userId) :
-                booking.booker.id.eq(userId);
-
-        switch (state.toUpperCase()) {
-            case "CURRENT":
-                baseCondition = baseCondition.and(
-                        // startTime <= сейчас
-                        booking.startTime.loe(LocalDateTime.now()).and(
-                                // endTime >= сейчас
-                                booking.endTime.goe(LocalDateTime.now()))
-                );
-                break;
-
-            case "PAST":
-                baseCondition = baseCondition.and(
-                        // endTime < сейчас
-                        booking.endTime.lt(LocalDateTime.now())
-                );
-                break;
-
-            case "FUTURE":
-                baseCondition = baseCondition.and(
-                        // startTime > сейчас
-                        booking.startTime.gt(LocalDateTime.now())
-                );
-                break;
-
-            case "WAITING":
-                baseCondition = baseCondition.and(
-                        booking.bookingStatus.eq(BookingStatus.WAITING)
-                );
-                break;
-
-            case "REJECTED":
-                baseCondition = baseCondition.and(
-                        booking.bookingStatus.eq(BookingStatus.REJECTED)
-                );
-                break;
-
-            case "ALL":
-                // Оставляем baseCondition без изменений
-                break;
-
-            default:
-                throw new ValidationException("Invalid state " + state);
-        }
-
-        Iterable<Booking> bookings = bookingRepository.findAll(
-                baseCondition,
-                Sort.by(Sort.Direction.DESC, "startTime") // ORDER BY
-        );
-
-        return StreamSupport.stream(bookings.spliterator(), false)
+        return bookingRepository.findBookingsByState(ownerId, state, true, null)
+                .stream()
                 .map(GlobalMapper::toDto)
                 .collect(Collectors.toList());
     }
+
 }
