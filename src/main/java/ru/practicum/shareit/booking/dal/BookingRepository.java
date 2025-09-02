@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.dal;
 
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,24 +17,46 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-
+/**
+ * Репозиторий для работы с бронированиями.
+ * Поддерживает базовые CRUD-операции и расширенные запросы с использованием QueryDSL.
+ */
 public interface BookingRepository extends JpaRepository<Booking, Long>,
         QuerydslPredicateExecutor<Booking> {
 
+    /**
+     * Находит все бронирования для указанных предметов.
+     *
+     * @param itemIds список идентификаторов предметов
+     * @return список бронирований для указанных предметов
+     */
     List<Booking> findByItemIdIn(List<Long> itemIds);
 
+    /**
+     * Проверяет, имеет ли пользователь завершенные бронирования для указанного предмета.
+     * Включает техническую задержку для корректной работы в тестовой среде.
+     *
+     * @param userId идентификатор пользователя
+     * @param itemId идентификатор предмета
+     * @return true если пользователь имеет завершенные бронирования для предмета, иначе false
+     */
     default boolean hasUserCompletedBookings(Long userId, Long itemId) {
         QBooking booking = QBooking.booking;
-
         LocalDateTime now = LocalDateTime.now();
 
-        //костыль, в тесте постмана не работает таймаут, и не успевает кончится бронирование
+        // Техническая задержка для корректной работы в тестовой среде
         return exists(booking.booker.id.eq(userId)
                 .and(booking.item.id.eq(itemId))
                 .and(booking.bookingStatus.eq(BookingStatus.APPROVED))
                 .and(booking.endTime.lt(now.minusNanos(500_000_000))));
     }
 
+    /**
+     * Находит все бронирования для указанного предмета.
+     *
+     * @param itemId идентификатор предмета
+     * @return список бронирований для указанного предмета
+     */
     List<Booking> findAllByItem_Id(Long itemId);
 
     /**
@@ -44,16 +65,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
      * @param userId  идентификатор пользователя
      * @param state   статус бронирования
      * @param isOwner флаг, указывающий является ли пользователь владельцем предметов
-     * @return список DTO бронирований, отфильтрованных по статусу
+     * @param itemId  идентификатор предмета (опционально)
+     * @return список бронирований, отфильтрованных по статусу
      * @throws ValidationException если передан неверный статус
      */
-
-    default List<Booking> findBookingsByState(Long userId, BookingState state, boolean isOwner, Long itemId) {
-        // Получил Q-класс для работы с полями Booking
+    default List<Booking> findBookingsByState(Long userId, BookingState state,
+                                              boolean isOwner, Long itemId) {
         QBooking booking = QBooking.booking;
 
         // Базовое условие - бронирования только для этого пользователя
-        // Эквивалент WHERE
         BooleanExpression baseCondition = isOwner ?
                 booking.item.owner.id.eq(userId) :
                 booking.booker.id.eq(userId);
@@ -67,17 +87,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
         switch (state) {
             case CURRENT:
                 baseCondition = baseCondition.and(
-                        // startTime <= сейчас
-                        booking.startTime.loe(now).and(
-                                // endTime >= сейчас
-                                booking.endTime.goe(now))
+                        // startTime <= сейчас AND endTime >= сейчас
+                        booking.startTime.loe(now).and(booking.endTime.goe(now))
                 );
                 break;
 
             case PAST:
                 baseCondition = baseCondition.and(
-                        // endTime < сейчас
-                        // костыль, потому-что таймаут не срабатывает
+                        // Бронирования, которые начались и завершились
                         booking.startTime.lt(now).and(booking.endTime.lt(now.minusSeconds(1)))
                 );
                 break;
@@ -102,32 +119,48 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
                 break;
 
             case ALL:
-                // Оставляем baseCondition без изменений
+                // Без дополнительных условий
                 break;
         }
 
         Iterable<Booking> bookings = findAll(
                 baseCondition,
-                Sort.by(Sort.Direction.DESC, "startTime") // ORDER BY
+                Sort.by(Sort.Direction.DESC, "startTime")
         );
 
         return StreamSupport.stream(bookings.spliterator(), false)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Находит текущее бронирование для указанного предмета.
+     *
+     * @param itemId  идентификатор предмета
+     * @param ownerId идентификатор владельца предмета
+     * @return Optional с текущим бронированием, если найдено
+     */
     default Optional<Booking> findLastBookingForItem(Long itemId, Long ownerId) {
-        List<Booking> currentBookings = findBookingsByState(ownerId, BookingState.CURRENT, true, itemId);
+        List<Booking> currentBookings = findBookingsByState(ownerId,
+                BookingState.CURRENT, true, itemId);
 
         return currentBookings.stream()
                 .filter(booking -> booking.getBookingStatus() == BookingStatus.APPROVED)
-                .findFirst(); // Берем первое текущее бронирование
+                .findFirst();
     }
 
+    /**
+     * Находит следующее бронирование для указанного предмета.
+     *
+     * @param itemId  идентификатор предмета
+     * @param ownerId идентификатор владельца предмета
+     * @return Optional со следующим бронированием, если найдено
+     */
     default Optional<Booking> findNextBookingForItem(Long itemId, Long ownerId) {
-        List<Booking> futureBookings = findBookingsByState(ownerId, BookingState.FUTURE, true, itemId);
+        List<Booking> futureBookings = findBookingsByState(ownerId,
+                BookingState.FUTURE, true, itemId);
 
         return futureBookings.stream()
                 .filter(booking -> booking.getBookingStatus() == BookingStatus.APPROVED)
-                .min(Comparator.comparing(Booking::getStartTime)); // Ближайшее по времени
+                .min(Comparator.comparing(Booking::getStartTime));
     }
 }

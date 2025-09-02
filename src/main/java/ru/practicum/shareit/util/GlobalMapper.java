@@ -79,16 +79,32 @@ public class GlobalMapper {
                 .build();
     }
 
+    /**
+     * Преобразует сущность Item в ItemBookingDto.
+     *
+     * @param item сущность предмета
+     * @return DTO предмета для бронирования
+     */
     public static ItemBookingDto toItemBookingDto(Item item) {
-        return new  ItemBookingDto(item.getId(), item.getName());
+        return new ItemBookingDto(item.getId(), item.getName());
     }
 
+    /**
+     * Преобразует сущность User в UserBookingDto.
+     *
+     * @param user сущность пользователя
+     * @return DTO пользователя для бронирования
+     */
     public static UserBookingDto toUserBookingDto(User user) {
-        return new  UserBookingDto(user.getId(), user.getName());
+        return new UserBookingDto(user.getId(), user.getName());
     }
 
     /**
      * Преобразует сущность Booking в BookingShortDto.
+     * Возвращает null, если передан null.
+     *
+     * @param booking сущность бронирования или null
+     * @return DTO краткой информации о бронировании или null
      */
     public static BookingShortDto toShortDto(Booking booking) {
         if (booking == null) {
@@ -103,7 +119,12 @@ public class GlobalMapper {
     }
 
     /**
-     * Преобразует сущность Item в ItemWithBookingsDto.
+     * Преобразует сущность Item в ItemWithBookingsDto с информацией о бронированиях и комментариях.
+     *
+     * @param item      сущность предмета
+     * @param bookings  список бронирований предмета
+     * @param comments  список комментариев к предмету
+     * @return DTO предмета с информацией о бронированиях
      */
     public static ItemWithBookingsDto toItemWithBookingsDto(Item item,
                                                             List<Booking> bookings,
@@ -126,14 +147,33 @@ public class GlobalMapper {
                 .build();
     }
 
+    /**
+     * Преобразует сущность Comment в CommentDto.
+     *
+     * @param comment сущность комментария
+     * @return DTO комментария
+     */
     public static CommentDto toCommentDto(Comment comment) {
-        return new CommentDto(comment.getId(), comment.getText(), comment.getAuthor().getName(), comment.getCreated());
+        return new CommentDto(comment.getId(),
+                comment.getText(),
+                comment.getAuthor().getName(),
+                comment.getCreated());
     }
 
+    /**
+     * Преобразует сущность Item в ItemLastNextBookingsAndCommentsDto
+     * с информацией о последнем/следующем бронировании и комментариях.
+     *
+     * @param item         сущность предмета
+     * @param lastBooking  последнее завершенное бронирование
+     * @param nextBooking  следующее бронирование
+     * @param comments     список комментариев к предмету
+     * @return DTO предмета с детальной информацией о бронированиях
+     */
     public static ItemLastNextBookingsAndCommentsDto toItemLastNextBookingsAndCommentsDto(Item item,
-                                                     BookingShortDto lastBooking,
-                                                     BookingShortDto nextBooking,
-                                                     List<Comment> comments) {
+                                                                                          BookingShortDto lastBooking,
+                                                                                          BookingShortDto nextBooking,
+                                                                                          List<Comment> comments) {
 
         List<CommentDto> commentDtos = comments.stream()
                 .map(GlobalMapper::toCommentDto)
@@ -150,5 +190,3 @@ public class GlobalMapper {
                 .build();
     }
 }
-
-
