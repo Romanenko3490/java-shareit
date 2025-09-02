@@ -1,20 +1,24 @@
+# Схема базы данных (ER-диаграмма)
+
+```mermaid
 erDiagram
-users ||--o{ items : owns
-users ||--o{ bookings : books
-users ||--o{ requests : creates
-users ||--o{ comments : writes
+
+    users ||--o{ items : "owns"
+    users ||--o{ bookings : "books"
+    users ||--o{ requests : "creates"
+    users ||--o{ comments : "writes"
 
     items ||--o{ bookings : "is booked"
     items ||--o{ comments : "has comments"
     items }o--|| requests : "created from"
-    
-    bookings }|--|| users : booker
-    bookings }|--|| items : item
-    
-    comments }|--|| users : author
-    comments }|--|| items : item
-    
-    requests }|--|| users : requester
+
+    bookings }|--|| users : "booker"
+    bookings }|--|| items : "item"
+
+    comments }|--|| users : "author"
+    comments }|--|| items : "item"
+
+    requests }|--|| users : "requester"
     requests ||--o{ items : "generates items"
 
     users {
@@ -22,7 +26,7 @@ users ||--o{ comments : writes
         varchar name
         varchar email UK
     }
-    
+
     items {
         bigint id PK
         varchar name
@@ -31,7 +35,7 @@ users ||--o{ comments : writes
         bigint owner_id FK
         bigint request_id FK
     }
-    
+
     bookings {
         bigint id PK
         timestamp start_time
@@ -41,7 +45,7 @@ users ||--o{ comments : writes
         varchar status
         timestamp created_time
     }
-    
+
     comments {
         bigint id PK
         text text
@@ -49,10 +53,11 @@ users ||--o{ comments : writes
         bigint author_id FK
         timestamp created
     }
-    
+
     requests {
         bigint id PK
         text description
         bigint requester_id FK
         timestamp created
     }
+```
