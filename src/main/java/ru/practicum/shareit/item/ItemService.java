@@ -144,8 +144,6 @@ public class ItemService {
         BookingShortDto nextBookingShortDto = bookingMapper.toShortDto(nextBooking);
         List<CommentDto> commentDtos = commentMapper.toDtos(comments);
 
-//        return GlobalMapper.toItemLastNextBookingsAndCommentsDto(
-//                item, lastBookingShortDto, nextBookingShortDto, comments);
         return itemMapper.toFullDto(item, lastBookingShortDto, nextBookingShortDto, commentDtos);
     }
 
@@ -189,8 +187,6 @@ public class ItemService {
                     List<BookingShortDto> shortBookingDtos = bookingMapper.toShortDtos(itemBookings);
                     List<CommentDto> commentDtos = commentMapper.toDtos(itemComments);
 
-//                    return GlobalMapper.toItemWithBookingsDto(
-//                            item, itemBookings, itemComments);
                     return itemMapper.toItemWithBookingDto(item, shortBookingDtos, commentDtos);
                 })
                 .collect(Collectors.toList());
