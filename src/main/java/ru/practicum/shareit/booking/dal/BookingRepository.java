@@ -48,7 +48,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
         return exists(booking.booker.id.eq(userId)
                 .and(booking.item.id.eq(itemId))
                 .and(booking.bookingStatus.eq(BookingStatus.APPROVED))
-                .and(booking.endTime.lt(now.minusNanos(500_000_000))));
+                .and(booking.endTime.lt(now)));
     }
 
     /**
@@ -95,7 +95,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
             case PAST:
                 baseCondition = baseCondition.and(
                         // Бронирования, которые начались и завершились
-                        booking.startTime.lt(now).and(booking.endTime.lt(now.minusSeconds(1)))
+                        booking.startTime.lt(now).and(booking.endTime.lt(now))
                 );
                 break;
 
