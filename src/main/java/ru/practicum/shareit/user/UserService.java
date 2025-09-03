@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.util.GlobalMapper;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.dto.NewUserRequest;
@@ -25,6 +24,10 @@ public class UserService {
      * Репозиторий пользователей.
      */
     private final UserRepository repository;
+    /**
+     * Маппер.
+     */
+    private final UserMapper mapper;
 
     /**
      * Добавляет нового пользователя.
@@ -39,7 +42,7 @@ public class UserService {
                 .email(request.getEmail())
                 .build());
         log.debug("User {} has been added", user);
-        return GlobalMapper.toDto(user);
+        return mapper.toDto(user);
     }
 
     /**
@@ -65,7 +68,7 @@ public class UserService {
         updateUserFields(user, request);
 
         log.debug("User {} has been updated", user);
-        return GlobalMapper.toDto(user);
+        return mapper.toDto(user);
     }
 
     /**
@@ -79,7 +82,7 @@ public class UserService {
         log.debug("Getting user by userId {}", userId);
         User user = repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail());
+        return mapper.toDto(user);
     }
 
     /**

@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dal.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.comments.CommentMapper;
 import ru.practicum.shareit.item.comments.dal.CommentRepository;
 import ru.practicum.shareit.item.comments.dto.CommentDto;
 import ru.practicum.shareit.item.comments.dto.NewCommentRequest;
@@ -18,7 +20,6 @@ import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.util.GlobalMapper;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -57,6 +58,14 @@ public class ItemService {
     private final CommentRepository commentRepository;
 
     /**
+     * Мапперы
+     */
+    private final ItemMapper itemMapper;
+    private final BookingMapper bookingMapper;
+    private final CommentMapper commentMapper;
+
+
+    /**
      * Добавляет новый предмет.
      *
      * @param userId  ID пользователя-владельца
@@ -76,7 +85,7 @@ public class ItemService {
                 .build();
         Item savedItem = itemRepository.save(item);
         log.debug("Creating new item {}", savedItem);
-        return GlobalMapper.toDto(savedItem);
+        return itemMapper.toDto(savedItem);
     }
 
     /**
@@ -105,7 +114,7 @@ public class ItemService {
         Item updatedItem = itemRepository.save(item);
         log.debug("Updated item {}", item);
 
-        return GlobalMapper.toDto(updatedItem);
+        return itemMapper.toDto(updatedItem);
     }
 
     /**
@@ -131,11 +140,13 @@ public class ItemService {
         Booking nextBooking = bookingRepository.findNextBookingForItem(itemId, ownerId)
                 .orElse(null);
 
-        BookingShortDto lastBookingShortDto = GlobalMapper.toShortDto(lastBooking);
-        BookingShortDto nextBookingShortDto = GlobalMapper.toShortDto(nextBooking);
+        BookingShortDto lastBookingShortDto = bookingMapper.toShortDto(lastBooking);
+        BookingShortDto nextBookingShortDto = bookingMapper.toShortDto(nextBooking);
+        List<CommentDto> commentDtos = commentMapper.toDtos(comments);
 
-        return GlobalMapper.toItemLastNextBookingsAndCommentsDto(
-                item, lastBookingShortDto, nextBookingShortDto, comments);
+//        return GlobalMapper.toItemLastNextBookingsAndCommentsDto(
+//                item, lastBookingShortDto, nextBookingShortDto, comments);
+        return itemMapper.toFullDto(item, lastBookingShortDto, nextBookingShortDto, commentDtos);
     }
 
     /**
@@ -175,9 +186,12 @@ public class ItemService {
                             item.getId(), Collections.emptyList());
                     List<Comment> itemComments = commentsByItemId.getOrDefault(
                             item.getId(), Collections.emptyList());
+                    List<BookingShortDto> shortBookingDtos = bookingMapper.toShortDtos(itemBookings);
+                    List<CommentDto> commentDtos = commentMapper.toDtos(itemComments);
 
-                    return GlobalMapper.toItemWithBookingsDto(
-                            item, itemBookings, itemComments);
+//                    return GlobalMapper.toItemWithBookingsDto(
+//                            item, itemBookings, itemComments);
+                    return itemMapper.toItemWithBookingDto(item, shortBookingDtos, commentDtos);
                 })
                 .collect(Collectors.toList());
     }
@@ -198,7 +212,7 @@ public class ItemService {
         String searchText = text.toLowerCase();
         log.debug("Searching items by text {}", searchText);
         return itemRepository.searchAvailableItemsByText(searchText).stream()
-                .map(GlobalMapper::toDto)
+                .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -236,7 +250,7 @@ public class ItemService {
                 .build());
         log.debug("Added comment {}", comment);
 
-        return GlobalMapper.toCommentDto(comment);
+        return commentMapper.toDto(comment);
     }
 
     /**

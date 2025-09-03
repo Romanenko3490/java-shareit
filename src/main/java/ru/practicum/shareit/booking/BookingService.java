@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.util.GlobalMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,9 +29,26 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional
 public class BookingService {
+
+    /**
+     * Репозиторий для работы с бронированиями.
+     */
     private final BookingRepository bookingRepository;
+
+    /**
+     * Репозиторий для работы с пользователями.
+     */
     private final UserRepository userRepository;
+
+    /**
+     * Репозиторий для работы с вещами.
+     */
     private final ItemRepository itemRepository;
+
+    /**
+     * Маппер.
+     */
+    private final BookingMapper bookingMapper;
 
     /**
      * Создает новое бронирование.
@@ -62,7 +78,7 @@ public class BookingService {
                 .build());
         log.debug("booking={}", booking);
 
-        return GlobalMapper.toDto(booking);
+        return bookingMapper.toDto(booking);
     }
 
     /**
@@ -92,7 +108,7 @@ public class BookingService {
 
         Booking updatedBooking = bookingRepository.save(booking);
         log.debug("updated booking={}", updatedBooking);
-        return GlobalMapper.toDto(updatedBooking);
+        return bookingMapper.toDto(booking);
     }
 
     /**
@@ -117,7 +133,7 @@ public class BookingService {
             throw new ValidationException("User not owner or author of booking");
         }
 
-        return GlobalMapper.toDto(booking);
+        return bookingMapper.toDto(booking);
     }
 
     /**
@@ -135,7 +151,7 @@ public class BookingService {
 
         return bookingRepository.findBookingsByState(userId, state, false, null)
                 .stream()
-                .map(GlobalMapper::toDto)
+                .map(bookingMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -153,7 +169,7 @@ public class BookingService {
         }
         return bookingRepository.findBookingsByState(ownerId, state, true, null)
                 .stream()
-                .map(GlobalMapper::toDto)
+                .map(bookingMapper::toDto)
                 .collect(Collectors.toList());
     }
 
