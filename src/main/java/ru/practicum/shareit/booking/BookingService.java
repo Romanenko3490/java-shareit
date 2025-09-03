@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
@@ -103,6 +104,7 @@ public class BookingService {
      * @throws NotFoundException   если бронирование не найдено
      * @throws ValidationException если пользователь не является ни владельцем, ни автором бронирования
      */
+    @Transactional(readOnly = true)
     public BookingDto getBookingById(Long userId, Long bookingId) {
         log.debug("getBooking bookerId={}, bookingId={}", bookingId, userId);
         Booking booking = bookingRepository.findById(bookingId)
@@ -125,6 +127,7 @@ public class BookingService {
      * @param state  статус бронирования (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED)
      * @return список DTO бронирований
      */
+    @Transactional(readOnly = true)
     public List<BookingDto> getUserBookings(Long userId, BookingState state) {
         if (!userRepository.findById(userId).isPresent()) {
             throw new NotFoundException("User not found");

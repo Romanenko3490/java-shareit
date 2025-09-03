@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dal.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class ItemService {
     /**
      * Репозиторий для работы с предметами.
@@ -86,6 +88,7 @@ public class ItemService {
      * @return обновленный предмет в формате DTO
      * @throws NotFoundException если предмет не найден или пользователь не является владельцем
      */
+
     public ItemDto updateItem(Long userId, Long itemId,
                               UpdateItemRequest request) {
         log.debug("Updating itemId {}", itemId);
@@ -112,6 +115,7 @@ public class ItemService {
      * @return предмет с информацией о последнем/следующем бронировании и комментариями
      * @throws NotFoundException если предмет не найден
      */
+    @Transactional(readOnly = true)
     public ItemLastNextBookingsAndCommentsDto getItem(Long itemId) {
         log.debug("Getting item {}", itemId);
         Item item = itemRepository.findById(itemId)
@@ -141,6 +145,7 @@ public class ItemService {
      * @return коллекция предметов пользователя с информацией о бронированиях
      * @throws NotFoundException если пользователь не найден
      */
+    @Transactional(readOnly = true)
     public Collection<ItemWithBookingsDto> getUserItems(Long userId) {
         log.debug("Getting items with bookings by user {}", userId);
         if (!userRepository.existsById(userId)) {
@@ -183,6 +188,7 @@ public class ItemService {
      * @param text текст для поиска (без учета регистра)
      * @return список найденных доступных предметов в формате DTO
      */
+    @Transactional(readOnly = true)
     public List<ItemDto> searchItemsByText(String text) {
         log.debug("Searching items by text {}", text);
         if (text == null || text.isBlank()) {

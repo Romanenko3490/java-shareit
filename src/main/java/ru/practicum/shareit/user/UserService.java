@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.util.GlobalMapper;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dal.UserRepository;
@@ -18,6 +19,7 @@ import ru.practicum.shareit.user.model.User;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class UserService {
     /**
      * Репозиторий пользователей.
@@ -72,6 +74,7 @@ public class UserService {
      * @param userId ID пользователя
      * @return найденный пользователь
      */
+    @Transactional(readOnly = true)
     public UserDto getUser(final Long userId) {
         log.debug("Getting user by userId {}", userId);
         User user = repository.findById(userId)

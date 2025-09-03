@@ -81,7 +81,7 @@ public class BookingController {
     public List<BookingDto> getUserBookings(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
-            @RequestParam(required = false, defaultValue = "ALL") String state) {
+            @RequestParam(defaultValue = "ALL") String state) {
         BookingState bookingState = BookingState.from(state);
         return bookingService.getUserBookings(userId, bookingState);
     }
@@ -97,7 +97,7 @@ public class BookingController {
     public List<BookingDto> getOwnersBooking(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
-            @RequestParam(required = false, defaultValue = "ALL") String state) {
+            @RequestParam(defaultValue = "ALL") String state) {
         BookingState bookingState = BookingState.from(state);
         return bookingService.getOwnerBookings(userId, bookingState);
     }
