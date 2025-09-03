@@ -17,7 +17,7 @@ import ru.practicum.shareit.user.model.User;
  *   <li>User → UserBookingDto (краткое преобразование для использования в бронированиях)</li>
  * </ul>
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
     /**
