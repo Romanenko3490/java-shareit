@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * TODO Sprint add-item-requests.
+ * Контроллер для работы с запросами на предметы.
+ * Обрабатывает HTTP-запросы, связанные с созданием и получением запросов.
  */
 @RestController
 @RequestMapping(path = "/requests")

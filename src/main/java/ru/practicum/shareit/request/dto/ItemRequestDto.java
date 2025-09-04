@@ -1,7 +1,9 @@
 package ru.practicum.shareit.request.dto;
 
+
 /**
- * TODO Sprint add-item-requests.
+ * DTO для запроса на предмет.
+ * Используется для передачи данных о запросе между клиентом и сервером.
  */
 public class ItemRequestDto {
 }
