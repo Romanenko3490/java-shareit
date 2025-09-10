@@ -3,7 +3,7 @@ package ru.practicum.shareit.user;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import ru.practicum.shareit.booking.dto.UserBookingDto;
+import ru.practicum.shareit.user.dto.SimpleUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -48,5 +48,5 @@ public interface UserMapper {
      */
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
-    UserBookingDto toUserBookingDto(User user);
+    SimpleUserDto toUserBookingDto(User user);
 }

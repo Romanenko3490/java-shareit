@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
+@Table(name = "requests")
 public class ItemRequest {
     /**
      * Идентификатор запроса.
@@ -41,20 +42,11 @@ public class ItemRequest {
     /**
      * Дата и время создания запроса.
      */
+    @Column(name = "created", insertable = false, updatable = false)
     private LocalDateTime created;
 
-    /**
-     * Конструктор для создания запроса.
-     *
-     * @param requestId          идентификатор запроса
-     * @param requestDescription описание запроса
-     * @param requester   пользователь-инициатор
-     */
-    public ItemRequest(final Long requestId, final String requestDescription,
-                       final User requester) {
-        this.id = requestId;
-        this.description = requestDescription;
+    public ItemRequest(String description, User requester) {
+        this.description = description;
         this.requester = requester;
-        this.created = LocalDateTime.now();
     }
 }

@@ -18,6 +18,9 @@ import ru.practicum.shareit.item.comments.model.Comment;
 import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dal.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -56,6 +59,7 @@ public class ItemService {
      * Репозиторий для работы с комментариями.
      */
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     /**
      * Мапперы
@@ -69,19 +73,30 @@ public class ItemService {
      * Добавляет новый предмет.
      *
      * @param userId  ID пользователя-владельца
-     * @param request данные предмета для создания
+     * @param newRequest данные предмета для создания
      * @return созданный предмет в формате DTO
      * @throws NotFoundException если пользователь не найден
      */
-    public ItemDto addItem(Long userId, NewItemRequest request) {
+    public ItemDto addItem(Long userId, NewItemRequest newRequest) {
         log.debug("Adding new item");
         User owner = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User not found"));
+
+        ItemRequest itemRequest = null;
+
+        if (newRequest.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(newRequest.getRequestId()).orElseThrow(
+                    () -> new NotFoundException("Request not found")
+            );
+        }
+
+
         Item item = Item.builder()
-                .name(request.getName())
-                .description(request.getDescription())
+                .name(newRequest.getName())
+                .description(newRequest.getDescription())
                 .owner(owner)
-                .available(request.getAvailable())
+                .available(newRequest.getAvailable())
+                .request(itemRequest)
                 .build();
         Item savedItem = itemRepository.save(item);
         log.debug("Creating new item {}", savedItem);

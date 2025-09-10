@@ -32,5 +32,5 @@ public class NewItemRequest {
     /**
      * ID запроса на предмет.
      */
-    private String request;
+    private Long requestId;
 }

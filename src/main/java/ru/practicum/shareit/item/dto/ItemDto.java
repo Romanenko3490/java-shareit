@@ -37,4 +37,6 @@ public class ItemDto {
      * Доступность предмета для аренды.
      */
     private Boolean available;
+
+    private Long requestId;
 }

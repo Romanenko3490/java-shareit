@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.enums.BookingStatus;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
+import ru.practicum.shareit.user.dto.SimpleUserDto;
 
 import java.time.LocalDateTime;
 
@@ -46,7 +47,7 @@ public class BookingDto {
      * Пользователь, который осуществил бронирование.
      * Не может быть null.
      */
-    private UserBookingDto booker;
+    private SimpleUserDto booker;
 
     /**
      * Статус бронирования.
