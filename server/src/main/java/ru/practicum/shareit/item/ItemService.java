@@ -20,7 +20,6 @@ import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dal.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -72,7 +71,7 @@ public class ItemService {
     /**
      * Добавляет новый предмет.
      *
-     * @param userId  ID пользователя-владельца
+     * @param userId     ID пользователя-владельца
      * @param newRequest данные предмета для создания
      * @return созданный предмет в формате DTO
      * @throws NotFoundException если пользователь не найден

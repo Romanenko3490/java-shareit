@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestWithReplaysDto;
 import ru.practicum.shareit.request.dto.NewRequest;
-import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
@@ -27,18 +26,18 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestWithReplaysDto> getAllRequests(@RequestHeader("X-Sharer-User-Id")
-                                                   Long userId) {
+                                                          Long userId) {
         return itemRequestService.getUserRequestsWithReplays(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto>  getAllRequests() {
+    public List<ItemRequestDto> getAllRequests() {
         return itemRequestService.getAllRequests();
     }
 
     @GetMapping("/{requestId}")
     public ItemRequestWithReplaysDto getRequest(@PathVariable(value = "requestId")
-                                                    Long requestId) {
+                                                Long requestId) {
         return itemRequestService.getRequestById(requestId);
     }
 
