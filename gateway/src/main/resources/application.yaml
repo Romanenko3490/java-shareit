@@ -4,3 +4,14 @@ server:
 shareit-server:
   url: "http://localhost:9090"
 
+spring:
+  cache:
+    cache-names:
+    - "itemsCache"
+    - "usersCache"
+    - "bookingsCache"
+    - "searchCache"
+    - "itemRequestsCache"
+
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m

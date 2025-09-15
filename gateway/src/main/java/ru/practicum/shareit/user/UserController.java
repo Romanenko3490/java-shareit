@@ -3,6 +3,8 @@ package ru.practicum.shareit.user;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
@@ -20,17 +22,20 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserDto updateUser(@PathVariable @Min(1) Long userId,
                               @RequestBody @Valid UpdateUserRequest request) {
         return userClient.updateUser(userId, request);
     }
 
     @GetMapping("/{userId}")
+    @Cacheable(value = "usersCache", key = "#userId")
     public UserDto getUser(@PathVariable @Min(1) Long userId) {
         return userClient.getUser(userId);
     }
 
     @DeleteMapping("/{userId}")
+    @CacheEvict(value = "usersCache", allEntries = true)
     public void deleteUser(@PathVariable @Min(1) Long userId) {
         userClient.deleteUser(userId);
     }

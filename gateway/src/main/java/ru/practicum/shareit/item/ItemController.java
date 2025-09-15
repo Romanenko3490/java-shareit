@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.dto.comments.NewCommentRequest;
@@ -30,6 +32,7 @@ public class ItemController {
 
 
     @PatchMapping("/{itemId}")
+    @CacheEvict(value = "itemsCache", allEntries = true)
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id")
                               @Min(1) Long userId,
                               @PathVariable
@@ -42,6 +45,7 @@ public class ItemController {
 
 
     @GetMapping("/{itemId}")
+    @Cacheable(value = "itemsCache", key = "{#userId, #itemId}")
     public ItemLastNextBookingsAndCommentsDto getItem(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
@@ -53,6 +57,7 @@ public class ItemController {
 
 
     @GetMapping()
+    @Cacheable(value = "itemsCache", key = "#userId")
     public Collection<ItemWithBookingsDto> getUserItems(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId) {
@@ -62,6 +67,7 @@ public class ItemController {
 
 
     @GetMapping("/search")
+    @Cacheable(value = "searchCache", key = "#text")
     public Collection<ItemDto> searchItemsByText(@RequestParam("text")
                                                  @NotBlank(message = "search empty")
                                                  String text) {
@@ -70,6 +76,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
+    @Cacheable(value = "itemsCache", key = "{#userId, #itemId, #request}")
     public ru.practicum.shareit.item.dto.comments.CommentDto addComment(@RequestHeader("X-Sharer-User-Id")
                                                                         @Min(1) Long userId,
                                                                         @PathVariable

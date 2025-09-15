@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
@@ -26,6 +29,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
+    @CacheEvict(value = "bookingsCache",  allEntries = true)
     public BookingDto changeBookingStatus(@RequestHeader("X-Sharer-User-Id")
                                           @Min(1) Long userId,
                                           @PathVariable
@@ -36,6 +40,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
+    @Cacheable(value = "bookingsCache", key = "{#userId, #bookingId}")
     public BookingDto getBooking(@RequestHeader("X-Sharer-User-Id")
                                  @Min(1) Long userId,
                                  @PathVariable("bookingId")
@@ -44,6 +49,7 @@ public class BookingController {
     }
 
     @GetMapping()
+    @Cacheable(value = "bookingsCache", key = "#userId")
     public List<BookingDto> getUserBookings(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
@@ -53,6 +59,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
+    @Cacheable(value = "bookingsCache", key = "#userId")
     public List<BookingDto> getOwnersBooking(
             @RequestHeader("X-Sharer-User-Id")
             @Min(1) Long userId,
