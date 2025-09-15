@@ -8,9 +8,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
-/**
- * Репозиторий для работы с запросами.
- */
+
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long>,
         QuerydslPredicateExecutor<ItemRequest> {
 

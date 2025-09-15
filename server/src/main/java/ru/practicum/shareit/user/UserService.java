@@ -12,30 +12,17 @@ import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-/**
- * Реализация сервиса для работы с пользователями.
- */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class UserService {
-    /**
-     * Репозиторий пользователей.
-     */
+
     private final UserRepository repository;
-    /**
-     * Маппер.
-     */
     private final UserMapper mapper;
 
-    /**
-     * Добавляет нового пользователя.
-     *
-     * @param request данные пользователя
-     * @return созданный пользователь
-     */
-    public UserDto addUser(final NewUserRequest request) {
+    public UserDto addUser(NewUserRequest request) {
         log.debug("Adding new user by request {}", request);
         User user = repository.save(User.builder()
                 .name(request.getName())
@@ -45,13 +32,7 @@ public class UserService {
         return mapper.toDto(user);
     }
 
-    /**
-     * Обновляет существующего пользователя.
-     *
-     * @param userId  ID пользователя
-     * @param request данные для обновления
-     * @return обновленный пользователь
-     */
+
     public UserDto updateUser(final Long userId,
                               final UpdateUserRequest request) {
         log.debug("Updating userId {}", userId);
@@ -66,17 +47,13 @@ public class UserService {
         }
 
         updateUserFields(user, request);
+        User updatedUser = repository.save(user);
 
         log.debug("User {} has been updated", user);
-        return mapper.toDto(user);
+        return mapper.toDto(updatedUser);
     }
 
-    /**
-     * Получает пользователя по ID.
-     *
-     * @param userId ID пользователя
-     * @return найденный пользователь
-     */
+
     @Transactional(readOnly = true)
     public UserDto getUser(final Long userId) {
         log.debug("Getting user by userId {}", userId);
@@ -85,11 +62,6 @@ public class UserService {
         return mapper.toDto(user);
     }
 
-    /**
-     * Удаляет пользователя по ID.
-     *
-     * @param userId ID пользователя
-     */
     public void deleteUser(final Long userId) {
         log.debug("Deleting user by userId {}", userId);
         if (!repository.existsById(userId)) {

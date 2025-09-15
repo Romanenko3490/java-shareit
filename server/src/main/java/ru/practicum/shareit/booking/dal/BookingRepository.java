@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.enums.BookingState;
 import ru.practicum.shareit.enums.BookingStatus;
-import ru.practicum.shareit.exception.ValidationException;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -17,29 +16,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-/**
- * Репозиторий для работы с бронированиями.
- * Поддерживает базовые CRUD-операции и расширенные запросы с использованием QueryDSL.
- */
+
 public interface BookingRepository extends JpaRepository<Booking, Long>,
         QuerydslPredicateExecutor<Booking> {
 
-    /**
-     * Находит все бронирования для указанных предметов.
-     *
-     * @param itemIds список идентификаторов предметов
-     * @return список бронирований для указанных предметов
-     */
+
     List<Booking> findByItemIdIn(List<Long> itemIds);
 
-    /**
-     * Проверяет, имеет ли пользователь завершенные бронирования для указанного предмета.
-     * Включает техническую задержку для корректной работы в тестовой среде.
-     *
-     * @param userId идентификатор пользователя
-     * @param itemId идентификатор предмета
-     * @return true если пользователь имеет завершенные бронирования для предмета, иначе false
-     */
+
     default boolean hasUserCompletedBookings(Long userId, Long itemId) {
         QBooking booking = QBooking.booking;
         LocalDateTime now = LocalDateTime.now();
@@ -51,24 +35,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
                 .and(booking.endTime.lt(now)));
     }
 
-    /**
-     * Находит все бронирования для указанного предмета.
-     *
-     * @param itemId идентификатор предмета
-     * @return список бронирований для указанного предмета
-     */
     List<Booking> findAllByItem_Id(Long itemId);
 
-    /**
-     * Вспомогательный метод для получения бронирований с фильтрацией по статусу.
-     *
-     * @param userId  идентификатор пользователя
-     * @param state   статус бронирования
-     * @param isOwner флаг, указывающий является ли пользователь владельцем предметов
-     * @param itemId  идентификатор предмета (опционально)
-     * @return список бронирований, отфильтрованных по статусу
-     * @throws ValidationException если передан неверный статус
-     */
+
     default List<Booking> findBookingsByState(Long userId, BookingState state,
                                               boolean isOwner, Long itemId) {
         QBooking booking = QBooking.booking;

@@ -30,54 +30,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Реализация сервиса для работы с предметами.
- * Обеспечивает бизнес-логику для операций с предметами, включая создание, обновление, поиск и получение.
- */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class ItemService {
-    /**
-     * Репозиторий для работы с предметами.
-     */
+
     private final ItemRepository itemRepository;
-
-    /**
-     * Репозиторий для работы с пользователями.
-     */
     private final UserRepository userRepository;
-
-    /**
-     * Репозиторий для работы с бронированиями.
-     */
     private final BookingRepository bookingRepository;
-
-    /**
-     * Репозиторий для работы с комментариями.
-     */
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
 
-    /**
-     * Мапперы
-     */
+
     private final ItemMapper itemMapper;
     private final BookingMapper bookingMapper;
     private final CommentMapper commentMapper;
 
 
-    /**
-     * Добавляет новый предмет.
-     *
-     * @param userId     ID пользователя-владельца
-     * @param newRequest данные предмета для создания
-     * @return созданный предмет в формате DTO
-     * @throws NotFoundException если пользователь не найден
-     */
     public ItemDto addItem(Long userId, NewItemRequest newRequest) {
         log.debug("Adding new item");
+        log.debug("request: {}", newRequest);
         User owner = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User not found"));
 
@@ -89,7 +63,6 @@ public class ItemService {
             );
         }
 
-
         Item item = Item.builder()
                 .name(newRequest.getName())
                 .description(newRequest.getDescription())
@@ -97,20 +70,12 @@ public class ItemService {
                 .available(newRequest.getAvailable())
                 .request(itemRequest)
                 .build();
+        log.debug("item: {}", item);
         Item savedItem = itemRepository.save(item);
         log.debug("Creating new item {}", savedItem);
         return itemMapper.toDto(savedItem);
     }
 
-    /**
-     * Обновляет существующий предмет.
-     *
-     * @param userId  ID пользователя-владельца
-     * @param itemId  ID обновляемого предмета
-     * @param request данные для обновления предмета
-     * @return обновленный предмет в формате DTO
-     * @throws NotFoundException если предмет не найден или пользователь не является владельцем
-     */
 
     public ItemDto updateItem(Long userId, Long itemId,
                               UpdateItemRequest request) {
@@ -131,13 +96,7 @@ public class ItemService {
         return itemMapper.toDto(updatedItem);
     }
 
-    /**
-     * Получает предмет по ID с информацией о бронированиях и комментариях.
-     *
-     * @param itemId ID запрашиваемого предмета
-     * @return предмет с информацией о последнем/следующем бронировании и комментариями
-     * @throws NotFoundException если предмет не найден
-     */
+
     @Transactional(readOnly = true)
     public ItemLastNextBookingsAndCommentsDto getItem(Long itemId) {
         log.debug("Getting item {}", itemId);
@@ -161,13 +120,7 @@ public class ItemService {
         return itemMapper.toFullDto(item, lastBookingShortDto, nextBookingShortDto, commentDtos);
     }
 
-    /**
-     * Получает все предметы пользователя с информацией о бронированиях и комментариях.
-     *
-     * @param userId ID пользователя-владельца предметов
-     * @return коллекция предметов пользователя с информацией о бронированиях
-     * @throws NotFoundException если пользователь не найден
-     */
+
     @Transactional(readOnly = true)
     public Collection<ItemWithBookingsDto> getUserItems(Long userId) {
         log.debug("Getting items with bookings by user {}", userId);
@@ -206,12 +159,7 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Ищет доступные предметы по тексту в названии или описании.
-     *
-     * @param text текст для поиска (без учета регистра)
-     * @return список найденных доступных предметов в формате DTO
-     */
+
     @Transactional(readOnly = true)
     public List<ItemDto> searchItemsByText(String text) {
         log.debug("Searching items by text {}", text);
@@ -226,24 +174,17 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Добавляет комментарий к предмету.
-     *
-     * @param userId  ID пользователя, оставляющего комментарий
-     * @param itemId  ID предмета, к которому добавляется комментарий
-     * @param request данные комментария (текст)
-     * @return созданный комментарий в формате DTO
-     * @throws NotFoundException   если пользователь или предмет не найдены
-     * @throws ValidationException если пользователь не имеет завершенных бронирований данного предмета
-     */
+
     public CommentDto addComment(Long userId,
                                  Long itemId,
                                  NewCommentRequest request) {
         log.debug("Adding new comment {}", request);
+
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User not found"));
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException("Item not found"));
+
 
         boolean hasValidBooking = bookingRepository.hasUserCompletedBookings(userId, itemId);
 
@@ -263,14 +204,6 @@ public class ItemService {
         return commentMapper.toDto(comment);
     }
 
-    /**
-     * Обновляет поля предмета на основе данных из запроса.
-     * Обновляются только те поля, которые присутствуют в запросе.
-     *
-     * @param item    предмет для обновления
-     * @param request запрос с данными для обновления
-     * @return обновленный предмет
-     */
     private Item updateFields(final Item item,
                               final UpdateItemRequest request) {
         if (request.hasName()) {

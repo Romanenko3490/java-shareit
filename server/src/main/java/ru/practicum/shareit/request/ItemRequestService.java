@@ -17,7 +17,10 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +34,7 @@ public class ItemRequestService {
     private final ItemRepository itemRepository;
 
     public ItemRequestDto addRequest(Long userId, NewRequest request) {
-        User user =  userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("User not found"));
 
         ItemRequest itemRequest = new ItemRequest(

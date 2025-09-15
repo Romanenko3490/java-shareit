@@ -1,21 +1,16 @@
 package ru.practicum.shareit.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Класс для представления ошибки в ответе API.
- */
+
 @Data
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class ErrorResponse {
-    /**
-     * Тип ошибки.
-     */
+
     private String error;
 
-    /**
-     * Описание ошибки.
-     */
     private String description;
 }

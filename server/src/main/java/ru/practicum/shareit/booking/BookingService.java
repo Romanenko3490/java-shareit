@@ -20,44 +20,17 @@ import ru.practicum.shareit.user.model.User;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Сервис для управления операциями бронирования.
- * Обеспечивает создание, обновление и получение информации о бронированиях.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class BookingService {
-
-    /**
-     * Репозиторий для работы с бронированиями.
-     */
     private final BookingRepository bookingRepository;
-
-    /**
-     * Репозиторий для работы с пользователями.
-     */
     private final UserRepository userRepository;
-
-    /**
-     * Репозиторий для работы с вещами.
-     */
     private final ItemRepository itemRepository;
-
-    /**
-     * Маппер.
-     */
     private final BookingMapper bookingMapper;
 
-    /**
-     * Создает новое бронирование.
-     *
-     * @param bookerId идентификатор пользователя, осуществляющего бронирование
-     * @param request  DTO с данными для создания бронирования
-     * @return DTO созданного бронирования
-     * @throws NotFoundException если пользователь или предмет не найдены
-     */
+
     public BookingDto addBooking(Long bookerId, NewBookingRequest request) {
         log.debug("addBooking bookerId={}, request={}", bookerId, request);
         User booker = userRepository.findById(bookerId)
@@ -81,16 +54,7 @@ public class BookingService {
         return bookingMapper.toDto(booking);
     }
 
-    /**
-     * Обновляет статус бронирования (подтверждение/отклонение).
-     *
-     * @param userId    идентификатор владельца предмета
-     * @param bookingId идентификатор бронирования
-     * @param approved  флаг подтверждения (true - подтверждено, false - отклонено)
-     * @return DTO обновленного бронирования
-     * @throws NotFoundException   если бронирование не найдено
-     * @throws ValidationException если пользователь не является владельцем предмета
-     */
+
     public BookingDto updateBookingStatus(Long userId, Long bookingId, Boolean approved) {
         log.debug("updateBooking bookerId={}, bookingId={}", bookingId, userId);
         Booking booking = bookingRepository.findById(bookingId)
@@ -111,15 +75,7 @@ public class BookingService {
         return bookingMapper.toDto(booking);
     }
 
-    /**
-     * Получает информацию о бронировании по идентификатору.
-     *
-     * @param userId    идентификатор пользователя, запрашивающего информацию
-     * @param bookingId идентификатор бронирования
-     * @return DTO бронирования
-     * @throws NotFoundException   если бронирование не найдено
-     * @throws ValidationException если пользователь не является ни владельцем, ни автором бронирования
-     */
+
     @Transactional(readOnly = true)
     public BookingDto getBookingById(Long userId, Long bookingId) {
         log.debug("getBooking bookerId={}, bookingId={}", bookingId, userId);
@@ -136,13 +92,7 @@ public class BookingService {
         return bookingMapper.toDto(booking);
     }
 
-    /**
-     * Получает список бронирований пользователя с фильтрацией по статусу.
-     *
-     * @param userId идентификатор пользователя
-     * @param state  статус бронирования (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED)
-     * @return список DTO бронирований
-     */
+
     @Transactional(readOnly = true)
     public List<BookingDto> getUserBookings(Long userId, BookingState state) {
         if (!userRepository.findById(userId).isPresent()) {
@@ -155,13 +105,7 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Получает список бронирований для предметов владельца с фильтрацией по статусу.
-     *
-     * @param ownerId идентификатор владельца предметов
-     * @param state   статус бронирования (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED)
-     * @return список DTO бронирований
-     */
+
     @Transactional(readOnly = true)
     public List<BookingDto> getOwnerBookings(Long ownerId, BookingState state) {
         if (!userRepository.findById(ownerId).isPresent()) {
