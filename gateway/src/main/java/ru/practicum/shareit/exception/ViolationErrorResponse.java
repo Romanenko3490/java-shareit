@@ -9,6 +9,5 @@ import java.util.List;
 @Getter
 @RequiredArgsConstructor
 public class ViolationErrorResponse {
-
     private final List<Violation> violations;
 }

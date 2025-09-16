@@ -10,16 +10,18 @@ import ru.practicum.shareit.enums.BookingState;
 
 import java.util.List;
 
+
 @Service
 public class BookingClient extends BaseWebClient {
     private static final String API_PREFIX = "/bookings";
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
-    public BookingClient(@Value("${shareit-server.url}") String serverUrl) {
+
+    public BookingClient(@Value("${shareit-server.url}") final String serverUrl) {
         super(serverUrl, API_PREFIX);
     }
 
-    public BookingDto addBooking(Long userId, NewBookingRequest request) {
+    public BookingDto addBooking(final Long userId, final NewBookingRequest request) {
         return webClient.post()
                 .header(USER_ID_HEADER, userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -29,7 +31,7 @@ public class BookingClient extends BaseWebClient {
                 .block();
     }
 
-    public BookingDto updateBookingStatus(Long userId, Long bookingId, Boolean approved) {
+    public BookingDto updateBookingStatus(final Long userId, final Long bookingId, final Boolean approved) {
         return webClient.patch()
                 .uri("/" + bookingId + "?approved=" + approved)
                 .header(USER_ID_HEADER, userId.toString())
@@ -38,7 +40,7 @@ public class BookingClient extends BaseWebClient {
                 .block();
     }
 
-    public BookingDto getBookingById(Long userId, Long bookingId) {
+    public BookingDto getBookingById(final Long userId, final Long bookingId) {
         return webClient.get()
                 .uri("/" + bookingId)
                 .header(USER_ID_HEADER, userId.toString())
@@ -47,7 +49,8 @@ public class BookingClient extends BaseWebClient {
                 .block();
     }
 
-    public List<BookingDto> getUserBookings(Long userId, BookingState state) {
+
+    public List<BookingDto> getUserBookings(final Long userId, final BookingState state) {
         return webClient.get()
                 .uri("?state=" + state)
                 .header(USER_ID_HEADER, userId.toString())
@@ -57,7 +60,8 @@ public class BookingClient extends BaseWebClient {
                 .block();
     }
 
-    public List<BookingDto> getOwnerBookings(Long userId, BookingState state) {
+
+    public List<BookingDto> getOwnerBookings(final Long userId, final BookingState state) {
         return webClient.get()
                 .uri("/owner?state=" + state)
                 .header(USER_ID_HEADER, userId.toString())
