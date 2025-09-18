@@ -46,6 +46,11 @@ public class ItemRequestService {
     }
 
     public List<ItemRequestWithReplaysDto> getUserRequestsWithReplays(Long userId) {
+
+        userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found")
+        );
+
         //Находим запросы, созданные пользователем
         List<ItemRequest> userRequests = requestRepository.findByRequesterIdOrderByCreatedDesc(userId);
 

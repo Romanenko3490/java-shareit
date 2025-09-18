@@ -21,6 +21,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
         QuerydslPredicateExecutor<Booking> {
 
 
+
     List<Booking> findByItemIdIn(List<Long> itemIds);
 
 
@@ -101,13 +102,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Находит текущее бронирование для указанного предмета.
-     *
-     * @param itemId  идентификатор предмета
-     * @param ownerId идентификатор владельца предмета
-     * @return Optional с текущим бронированием, если найдено
-     */
     default Optional<Booking> findLastBookingForItem(Long itemId, Long ownerId) {
         List<Booking> currentBookings = findBookingsByState(ownerId,
                 BookingState.CURRENT, true, itemId);
@@ -117,13 +111,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long>,
                 .findFirst();
     }
 
-    /**
-     * Находит следующее бронирование для указанного предмета.
-     *
-     * @param itemId  идентификатор предмета
-     * @param ownerId идентификатор владельца предмета
-     * @return Optional со следующим бронированием, если найдено
-     */
     default Optional<Booking> findNextBookingForItem(Long itemId, Long ownerId) {
         List<Booking> futureBookings = findBookingsByState(ownerId,
                 BookingState.FUTURE, true, itemId);

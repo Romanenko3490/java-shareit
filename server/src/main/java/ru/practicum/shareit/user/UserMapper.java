@@ -3,8 +3,8 @@ package ru.practicum.shareit.user;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import ru.practicum.shareit.user.dto.SimpleUserDto;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.dto.SimpleUserDto;
+import ru.practicum.shareit.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 

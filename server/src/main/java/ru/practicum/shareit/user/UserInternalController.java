@@ -3,9 +3,9 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.NewUserRequest;
-import ru.practicum.shareit.user.dto.UpdateUserRequest;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.dto.NewUserRequest;
+import ru.practicum.shareit.dto.UpdateUserRequest;
+import ru.practicum.shareit.dto.UserDto;
 
 @RestController
 @RequestMapping("/users")
