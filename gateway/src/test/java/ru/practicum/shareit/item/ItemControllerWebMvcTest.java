@@ -265,11 +265,11 @@ class ItemControllerWebMvcTest {
     void searchItemsByText_shouldReturnBadRequest_whenTextParamIsBlank() throws Exception {
         mockMvc.perform(get("/items/search")
                         .param("text", ""))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/items/search")
                         .param("text", "   "))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/items/search"))
                 .andExpect(status().isBadRequest());

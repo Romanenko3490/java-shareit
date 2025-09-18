@@ -6,8 +6,8 @@ import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
 @EnableCaching
-public class GetawayApp {
+public class GatewayApp {
     public static void main(String[] args) {
-        SpringApplication.run(GetawayApp.class, args);
+        SpringApplication.run(GatewayApp.class, args);
     }
 }

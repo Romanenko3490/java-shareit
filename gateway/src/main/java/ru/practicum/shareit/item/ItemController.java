@@ -7,17 +7,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.dto.comments.NewCommentRequest;
 
 import java.util.Collection;
+import java.util.Collections;
 
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
     private final ItemClient itemClient;
 
@@ -38,7 +41,7 @@ public class ItemController {
                               @PathVariable
                               @Min(1) Long itemId,
                               @RequestBody
-                              @Valid UpdateItemRequest request) {
+                              UpdateItemRequest request) {
         log.info("Обновление предмета с ID: {} для пользователя с ID: {}", itemId, userId);
         return itemClient.updateItem(userId, itemId, request);
     }
@@ -68,10 +71,14 @@ public class ItemController {
 
     @GetMapping("/search")
     @Cacheable(value = "searchCache", key = "#text")
-    public Collection<ItemDto> searchItemsByText(@RequestParam("text")
-                                                 @NotBlank(message = "search empty")
-                                                 String text) {
-        log.info("Поиск предметов по тексту: {}", text);
+    public Collection<ItemDto> searchItemsByText(@RequestParam("text") String text) {
+        log.info("Поиск предметов по тексту: '{}'", text);
+
+        if (text == null || text.isBlank()) {
+            log.debug("Текст поиска пустой. Возвращаем пустую коллекцию.");
+            return Collections.emptyList();
+        }
+
         return itemClient.searchItemsByText(text);
     }
 
