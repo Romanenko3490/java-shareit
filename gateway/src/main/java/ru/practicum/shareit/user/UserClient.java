@@ -12,7 +12,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 public class UserClient extends BaseWebClient {
     private static final String API_PREFIX = "/users";
 
-    public UserClient(@Value("${shareit-server.url}") String serverUrl) {
+        public UserClient(@Value("${shareit-server.url}") String serverUrl) {
         super(serverUrl, API_PREFIX);
     }
 
